@@ -36,8 +36,8 @@ func findContacts(srv *sheets.Service, id, name string) ([]Result, error) {
 	} else {
 		for i, row := range resp.Values {
 			for _, cell := range row {
-				c1 := fmt.Sprintf("%v", cell)
-				c2 := fmt.Sprintf("%v", cell)
+				c1 := strings.ToLower(fmt.Sprintf("%v", cell))
+				c2 := strings.ToLower(fmt.Sprintf("%v", cell))
 				if strings.Contains(c1, strings.ToLower(name))||strings.Contains(c2, strings.ToLower(name)) {
 					y = append(y, i+1)
 					println(y)

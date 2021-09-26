@@ -51,37 +51,39 @@ func main() {
 		}
 		curUser := update.Message.From.UserName
 		if update.Message.IsCommand() {
-			println("command")
 			_, ok := users[curUser]
 			if !ok {
-				println("no")
 				continue
 			}
 
-			println("yes")
 			users[curUser] = update.Message.Command()
 			switch users[curUser] {
 			case pull:
-				msg1 := tgbotapi.NewMessage(update.Message.Chat.ID, pullWelcome)
-				msg1.ReplyToMessageID = update.Message.MessageID
-				_, _ = bot.Send(msg1)
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, pullWelcome)
+				msg.ReplyToMessageID = update.Message.MessageID
+				_, _ = bot.Send(msg)
 			case push:
 
 			default:
-				msg1 := tgbotapi.NewMessage(update.Message.Chat.ID, pullWelcome)
-				msg1.ReplyToMessageID = update.Message.MessageID
-				_, _ = bot.Send(msg1)
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, pullWelcome)
+				msg.ReplyToMessageID = update.Message.MessageID
+				_, _ = bot.Send(msg)
 			}
 
 			continue
 		}
-
-		com, ok := users[curUser]
-		if !ok {
-			println("not ok")
+		if update.Message.Text == ""{
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "не текст")
+			_, _ = bot.Send(msg)
 			continue
 		}
-		println("ok")
+		com, ok := users[curUser]
+		if !ok {
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, pullWelcome)
+			msg.ReplyToMessageID = update.Message.MessageID
+			_, _ = bot.Send(msg)
+			continue
+		}
 		switch com {
 		case pull:
 
@@ -98,10 +100,16 @@ func main() {
 			for i, contact := range res {
 				message += fmt.Sprintf("%v)%v,%v,%v,%v,%v,\n", i+1, contact.Name, contact.Job, contact.Cell, contact.Tg, contact.Other)
 			}
-			msg1 := tgbotapi.NewMessage(update.Message.Chat.ID, message)
-			_, _ = bot.Send(msg1)
+			if message==""{
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "в базе нет")
+				_, _ = bot.Send(msg)
+				continue
+			}
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, message)
+			_, _ = bot.Send(msg)
+			continue
 		}
-
+		continue
 	}
 
 	quit := make(chan os.Signal, 1)
