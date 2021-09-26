@@ -1,6 +1,4 @@
 .env
-.idea
-*.jpeg
-*.jpg
-configs/users.go
 *.json
+.idea
+configs/users.go

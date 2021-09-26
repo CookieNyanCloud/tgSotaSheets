@@ -3,113 +3,82 @@ package service
 import (
 	"fmt"
 	"google.golang.org/api/sheets/v4"
-	"io"
 	"log"
-	"os"
-	"strconv"
 	"strings"
-	"sync"
 )
 
-func GetContact(srv *sheets.Service, name string) ([]string, error) {
-	r, err := findContacts(srv,id, name)
+type Result struct {
+	Name  string
+	Job   string
+	Cell  string
+	Tg    string
+	Other string
+}
+
+func GetContact(srv *sheets.Service, id, name string) ([]Result, error) {
+	res, err := findContacts(srv, id, name)
 	if err != nil {
 		log.Fatalf("Unable to retrieve files: %v", err)
 	}
-	fileslist := make([]string, len(r.Files))
-	if len(r.Files) == 0 {
-		fmt.Println("No files found.")
-	} else {
-		var wg sync.WaitGroup
-		for j, i := range r.Files {
-			wg.Add(1)
-			fileslist[j] = i.Name
-			go func(srv *drive.Service, i *drive.File, wg *sync.WaitGroup) {
-				err = load(srv, i, wg)
-				if err != nil {
-					log.Fatalf("Unable to retrieve files2: %v", err)
-				}
-			}(srv, i, &wg)
-		}
-		wg.Wait()
-	}
-	return fileslist, nil
+	return res, nil
 }
 
-//func SendPhoto(srv *drive.Service, name, dirType, drivePeople, driveZag string) error {
-//	data := strings.Split(name, ".")
-//	r, err := findPhoto(srv, data[0])
-//	if err != nil {
-//		log.Fatalf("Unable to retrieve files: %v", err)
-//	}
-//	fmt.Println(r.Files[0].DriveId)
-//	fmt.Println(r.Files[0].Parents)
-//	println(len(r.Files))
-//	newname := name
-//	num := strconv.Itoa(len(r.Files) + 1)
-//	newname = data[0] + " " + num + "." + data[1]
-//	src, err := os.Open(name)
-//	if err != nil {
-//		return err
-//	}
-//	defer src.Close()
-//	fl := &drive.File{}
-//	fl.Name = newname //+ author
-//	fl.MimeType = "image/jpeg"
-//	var folder string
-//	switch dirType {
-//	case "з":
-//		folder = driveZag
-//	case "л":
-//		folder = drivePeople
-//	default:
-//		folder = drivePeople
-//	}
-//	fs := make([]string, 1)
-//	fs[0] = folder
-//	fl.Parents = fs
-//	file, err := srv.
-//		Files.
-//		Create(fl).
-//		SupportsAllDrives(true).
-//		SupportsTeamDrives(true).
-//		Media(src).
-//		Do()
-//	fmt.Println(file.Name)
-//	return nil
-//}
-
-//func load(srv *sheets.Service, r *sheets.File, wg *sync.WaitGroup) error {
-//	println(r.Name, "start")
-//	res, err := srv.Files.Get(r.Id).Download()
-//	if err != nil {
-//		return err
-//	}
-//	defer res.Body.Close()
-//	if res.StatusCode != 200 {
-//		return err
-//	}
-//	fileNew, err := os.Create(r.Name)
-//	if err != nil {
-//		return err
-//	}
-//	defer fileNew.Close()
-//	_, err = io.Copy(fileNew, res.Body)
-//	if err != nil {
-//		return err
-//	}
-//	wg.Done()
-//	println(r.Name, "done")
-//	return nil
-//}
-
-func findContacts(srv *sheets.Service, id, name string) (error) {
-	var batch *sheets.BatchGetValuesByDataFilterRequest
-	batch.DataFilters[0].A1Range = name
-	result, err:= srv.Spreadsheets.Values.BatchGetByDataFilter(id,batch).Do()
+func findContacts(srv *sheets.Service, id, name string) ([]Result, error) {
+	readRange := "Sheet1!A:B"
+	resp, err := srv.Spreadsheets.Values.Get(id, readRange).Do()
 	if err != nil {
-		fmt.Println("finding err:",err)
+		log.Fatalf("Unable to retrieve data from sheet: %v", err)
 	}
-	fmt.Println(result.ValueRanges)
-	return err
+	var y []int
+	if len(resp.Values) == 0 {
+		fmt.Println("No data found.")
+		return []Result{}, nil
+	} else {
+		for i, row := range resp.Values {
+			for _, cell := range row {
+				c1 := fmt.Sprintf("%v", cell)
+				c2 := fmt.Sprintf("%v", cell)
+				if strings.Contains(c1, strings.ToLower(name))||strings.Contains(c2, strings.ToLower(name)) {
+					y = append(y, i+1)
+					println(y)
+				}
+			}
+		}
+		out := make([]Result, 0)
+
+		for i := range y {
+			a := fmt.Sprintf("%v", y[i])
+			e := fmt.Sprintf("%v", y[i])
+			res := "Sheet1!A" + a + ":" + "E" + e
+			fmt.Println(res)
+			rsp, err := srv.Spreadsheets.Values.Get(id, res).Do()
+			if err != nil {
+				log.Fatalf("Unable to retrieve data from sheet: %v", err)
+			}
+			if len(resp.Values) == 0 {
+				fmt.Println("No data found.")
+			} else {
+				for _, row := range rsp.Values {
+					var newrow [5]string
+					fmt.Println(len(row))
+					for i := 0; i < len(row); i++ {
+						newrow[i] = fmt.Sprintf("%v", row[i])
+					}
+					for i := 4; i < 5-len(row); i++ {
+						newrow[i] = fmt.Sprintf("%v", "")
+					}
+					tmp := Result{
+						Name:  fmt.Sprintf("%v", newrow[0]),
+						Job:   fmt.Sprintf("%v", newrow[1]),
+						Cell:  fmt.Sprintf("%v", newrow[2]),
+						Tg:    fmt.Sprintf("%v", newrow[3]),
+						Other: fmt.Sprintf("%v", newrow[4]),
+					}
+					out = append(out, tmp)
+				}
+			}
+		}
+		return out, nil
+	}
+	return []Result{}, err
 }

@@ -6,11 +6,9 @@ import (
 	"log"
 	"os"
 )
-
 func StartSotaBot(tokenS string) (*tgbotapi.BotAPI,tgbotapi.UpdatesChannel)  {
 	_ = godotenv.Load()
 	token:= os.Getenv(tokenS)
-	println(token)
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Panic(err)
