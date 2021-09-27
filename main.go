@@ -107,6 +107,7 @@ func main() {
 			if  len(update.Message.Text) <5 {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "слишком широкая выборка")
 				_, _ = bot.Send(msg)
+				continue
 			}
 
 			res, err := service.GetContact(srv, conf.SheetsAdr, update.Message.Text)
