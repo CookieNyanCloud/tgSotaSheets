@@ -3,14 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/cookienyancloud/tgSotaSheets/configs"
 	"github.com/cookienyancloud/tgSotaSheets/service"
 	"github.com/cookienyancloud/tgSotaSheets/sotatgbot"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
-	"log"
-	"strings"
 )
 
 const (
@@ -18,19 +19,19 @@ const (
 	credFile = "driveapisearch.json"
 )
 const (
-	pull = "1"
-	push = "2"
+	pull     = "1"
+	push     = "2"
 	pushUser = "3"
 )
 
 const (
-	welcome = "бот поиска по инкунабуле контактов v2"
+	welcome     = "бот поиска по инкунабуле контактов v2"
 	pullWelcome = "пришлите значение поиска"
 	pushWelcome = `пришлите контакт в формате "ФИО, должность, номер, тг, дополнительно"
-,пустыне строки можно пропустить`
+,пустыне строки можно пробелом`
 	pushUserWelcome = `пришлите тг ник человека`
-	restricted = "в доступе отказано"
-	unknown = "хз"
+	restricted      = "в доступе отказано"
+	unknown         = "хз"
 )
 
 func main() {
@@ -43,7 +44,7 @@ func main() {
 		log.Fatalf("Unable to parse credantials file: %v", err)
 	}
 
-	users,err := configs.InitUsers()
+	users, err := configs.InitUsers()
 	if err != nil {
 		log.Fatalf("error getting users: %v", err)
 	}
@@ -88,7 +89,7 @@ func main() {
 			continue
 		}
 
-		if update.Message.Text == ""{
+		if update.Message.Text == "" {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "не текст")
 			_, _ = bot.Send(msg)
 			continue
@@ -114,21 +115,21 @@ func main() {
 			for i, contact := range res {
 				message += fmt.Sprintf("%v)", i+1)
 				message += fmt.Sprintf("%v, ", contact.Name)
-				if contact.Job != ""{
+				if contact.Job != "" {
 					message += fmt.Sprintf("%v, ", contact.Job)
 				}
-				if contact.Cell != ""{
+				if contact.Cell != "" {
 					message += fmt.Sprintf("%v, ", contact.Cell)
 				}
-				if contact.Tg != ""{
+				if contact.Tg != "" {
 					message += fmt.Sprintf("%v, ", contact.Tg)
 				}
-				if contact.Other != ""{
+				if contact.Other != "" {
 					message += fmt.Sprintf("%v", contact.Other)
 				}
 				message += fmt.Sprintf("\n")
 			}
-			if message==""{
+			if message == "" {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "в базе нет")
 				_, _ = bot.Send(msg)
 				continue
@@ -136,16 +137,21 @@ func main() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, message)
 			_, _ = bot.Send(msg)
 		case push:
-			input:=strings.Split(update.Message.Text,",")
+			input := strings.Split(update.Message.Text, ",")
 			fmt.Println(input)
-			userContact:= service.Result{
+			if len(input) != 5 {
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "не формат")
+				_, _ = bot.Send(msg)
+				continue
+			}
+			userContact := service.Result{
 				Name:  input[0],
 				Job:   input[1],
 				Cell:  input[2],
 				Tg:    input[3],
 				Other: input[4],
 			}
-			err := service.SendContact(srv, conf.SheetsAdr,userContact )
+			err := service.SendContact(srv, conf.SheetsAdr, userContact)
 			if err != nil {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintln("in case push:", err))
 				_, _ = bot.Send(msg)
@@ -155,7 +161,7 @@ func main() {
 			_, _ = bot.Send(msg)
 		case pushUser:
 			name := strings.ReplaceAll(update.Message.Text, "@", "")
-			err := configs.AddUser(users,name)
+			err := configs.AddUser(users, name)
 			if err != nil {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintln("in case pushUser:", err))
 				_, _ = bot.Send(msg)
