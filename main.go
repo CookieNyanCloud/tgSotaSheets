@@ -107,7 +107,7 @@ func main() {
 			if  len(update.Message.Text) <5 {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "слишком широкая выборка")
 				_, _ = bot.Send(msg)
-				continue
+				break
 			}
 
 			res, err := service.GetContact(srv, conf.SheetsAdr, update.Message.Text)
@@ -115,7 +115,7 @@ func main() {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintln("in case pull:", err))
 				_, _ = bot.Send(msg)
 				fmt.Println("in case pull:", err)
-				continue
+				break
 			}
 			var message string
 			for i, contact := range res {
@@ -138,7 +138,7 @@ func main() {
 			if message == "" {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "в базе нет")
 				_, _ = bot.Send(msg)
-				continue
+				break
 			}
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, message)
 			_, _ = bot.Send(msg)
@@ -148,7 +148,7 @@ func main() {
 			if len(input) != 5 {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "не формат")
 				_, _ = bot.Send(msg)
-				continue
+				break
 			}
 			userContact := service.Result{
 				Name:  input[0],
