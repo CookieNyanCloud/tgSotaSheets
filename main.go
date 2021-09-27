@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/cookienyancloud/tgSotaSheets/configs"
-	"github.com/cookienyancloud/tgSotaSheets/internal/service"
+	"github.com/cookienyancloud/tgSotaSheets/service"
 	"github.com/cookienyancloud/tgSotaSheets/sotatgbot"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"google.golang.org/api/option"
@@ -138,7 +138,7 @@ func main() {
 		case push:
 			input:=strings.Split(update.Message.Text,",")
 			fmt.Println(input)
-			userContact:=service.Result{
+			userContact:= service.Result{
 				Name:  input[0],
 				Job:   input[1],
 				Cell:  input[2],
