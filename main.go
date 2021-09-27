@@ -167,7 +167,7 @@ func main() {
 			_, _ = bot.Send(msg)
 		case pushUser:
 			name := strings.ReplaceAll(update.Message.Text, "@", "")
-			err := configs.AddUser(users, name)
+			err := configs.AddUser(users,update.Message.From.UserName, name)
 			if err != nil {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintln("in case pushUser:", err))
 				_, _ = bot.Send(msg)
