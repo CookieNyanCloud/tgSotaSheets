@@ -104,6 +104,11 @@ func main() {
 
 		switch com {
 		case pull:
+			if  len(update.Message.Text) <5 {
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "слишком широкая выборка")
+				_, _ = bot.Send(msg)
+			}
+
 			res, err := service.GetContact(srv, conf.SheetsAdr, update.Message.Text)
 			if err != nil {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintln("in case pull:", err))
