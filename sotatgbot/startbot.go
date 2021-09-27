@@ -2,13 +2,10 @@ package sotatgbot
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/joho/godotenv"
 	"log"
-	"os"
 )
-func StartSotaBot(tokenS string) (*tgbotapi.BotAPI,tgbotapi.UpdatesChannel)  {
-	_ = godotenv.Load()
-	token:= os.Getenv(tokenS)
+
+func StartSotaBot(token string) (*tgbotapi.BotAPI, tgbotapi.UpdatesChannel) {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Panic(err)
