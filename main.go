@@ -51,7 +51,6 @@ func main() {
 
 	bot, updates := sotatgbot.StartSotaBot(conf.Token)
 	for update := range updates {
-
 		if update.Message.Command() == "start" {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, welcome)
 			_, _ = bot.Send(msg)
@@ -104,12 +103,11 @@ func main() {
 
 		switch com {
 		case pull:
-			if  len(update.Message.Text) <5 {
+			if len(update.Message.Text) < 5 {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "слишком широкая выборка")
 				_, _ = bot.Send(msg)
 				break
 			}
-
 			res, err := service.GetContact(srv, conf.SheetsAdr, update.Message.Text)
 			if err != nil {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintln("in case pull:", err))
@@ -143,6 +141,8 @@ func main() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, message)
 			_, _ = bot.Send(msg)
 		case push:
+			println("2", com)
+
 			input := strings.Split(update.Message.Text, ",")
 			fmt.Println(input)
 			if len(input) != 5 {
@@ -166,14 +166,19 @@ func main() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "добавлен")
 			_, _ = bot.Send(msg)
 		case pushUser:
+			println("3", com)
+
 			name := strings.ReplaceAll(update.Message.Text, "@", "")
-			err := configs.AddUser(users,update.Message.From.UserName, name)
+			err := configs.AddUser(users, update.Message.From.UserName, name)
 			if err != nil {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintln("in case pushUser:", err))
 				_, _ = bot.Send(msg)
 				fmt.Println("in case pushUser:", err)
 			}
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "добавлен")
+			_, _ = bot.Send(msg)
+		default:
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, unknown)
 			_, _ = bot.Send(msg)
 		}
 		continue
