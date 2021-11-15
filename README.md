@@ -1,3 +1,5 @@
+[![GoReportCard](https://goreportcard.com/badge/github.com/cookienyancloud/tgsotasheets)](https://goreportcard.com/report/github.com/cookienyancloud/tgsotasheets)
+
 # Бот взяимодействия с таблицей контаков
 
 ## Запуск

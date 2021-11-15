@@ -34,11 +34,11 @@ func envVar(local bool) *Conf {
 	}
 }
 
-func AddUser(users map[string]string,you, user string) error  {
+func AddUser(users map[string]string, you, user string) error {
 	users[you] = "0"
-	filePath:= "users.json"
+	filePath := "users.json"
 	users[user] = "0"
-	jsonUsers,err:= json.Marshal(users)
+	jsonUsers, err := json.Marshal(users)
 	if err != nil {
 		return err
 	}

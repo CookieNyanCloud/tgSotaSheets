@@ -27,12 +27,12 @@ func GetContact(srv *sheets.Service, id, name string) ([]Result, error) {
 }
 
 func SendContact(srv *sheets.Service, id string, contact Result) error {
-	_,y, err := searchRows(srv, id, "")
+	_, y, err := searchRows(srv, id, "")
 	if err != nil {
 		return err
 		log.Fatalf("Unable to retrieve files: %v", err)
 	}
-	lenSheet := strconv.Itoa(y[len(y)-1]+1)
+	lenSheet := strconv.Itoa(y[len(y)-1] + 1)
 	inValues := make([]interface{}, 5)
 	inValues[0] = contact.Name
 	inValues[1] = contact.Job
@@ -49,7 +49,7 @@ func SendContact(srv *sheets.Service, id string, contact Result) error {
 		ForceSendFields: nil,
 		NullFields:      nil,
 	}
-	rangeAE := "Sheet1!A"+lenSheet+":E"+lenSheet
+	rangeAE := "Sheet1!A" + lenSheet + ":E" + lenSheet
 	resp, err := srv.Spreadsheets.Values.Update(id, rangeAE, &valRen).ValueInputOption("RAW").Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve files: %v", err)
